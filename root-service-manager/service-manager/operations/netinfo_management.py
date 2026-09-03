@@ -32,6 +32,14 @@ def _convert_job_to_netinfo(job):
             _subdict(service_ip, ["Address", "Address_v6", "IpType"])
         )
     netinfo["service_ip_list"] = service_ip_list
+    
+    # Expose the Round Robin (RR) IP as a top-level field for convenience,
+    # instead of requiring the caller to search for it inside service_ip_list.
+    netinfo["rr_ip"] = None
+    for ip_entry in service_ip_list:
+        if ip_entry.get("IpType") == "RR":
+            netinfo["rr_ip"] = ip_entry.get("Address") or ip_entry.get("Address_v6")
+            break
 
     instance_list = []
     for instance in job.get("instance_list", []):
